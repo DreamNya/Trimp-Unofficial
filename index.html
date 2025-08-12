@@ -1409,13 +1409,21 @@ function importAuto1(){
 		AutoTrimps2.onload=()=>{
 			document.body.appendChild(document.createElement('script')).textContent=
 				`try {
-					let text = delayStartAgain.toString()
-					text = text.slice(text.indexOf('{') + 1, -1)
-					const arg = text.match(/\((.*)\)/)[1]
-					const reg = /setInterval/g
-					if (!reg.test(text)) throw new Error('正则替换失败 文本未找到')
-					text = text.replace(reg, 'WebWorker.setInterval')
-					delayStartAgain = new Function(arg, text)
+					if(btoa(startStopLoop.toString())!=='ZnVuY3Rpb24gc3RhcnRTdG9wTG9vcChsb29wTmFtZSwgYWN0aW9uKSB7DQoJaWYgKGF0Q29uZmlnLmxvb3BzW2xvb3BOYW1lXSkgew0KCQljbGVhckludGVydmFsKGF0Q29uZmlnLmxvb3BzW2xvb3BOYW1lXSk7DQoJCWF0Q29uZmlnLmxvb3BzW2xvb3BOYW1lXSA9IG51bGw7DQoJfQ0KDQoJaWYgKGFjdGlvbiAhPT0gJ3N0YXJ0JykgcmV0dXJuOw0KDQoJY29uc3QgaW50ZXJ2YWwgPSBhdENvbmZpZy5ydW5JbnRlcnZhbCAqIChsb29wTmFtZSA9PT0gJ2d1aUxvb3AnID8gMTAgOiAxKTsNCglhdENvbmZpZy5sb29wc1tsb29wTmFtZV0gPSBzZXRJbnRlcnZhbCh3aW5kb3dbbG9vcE5hbWVdLCBpbnRlcnZhbCk7DQp9'){
+						throw new Error('startStopLoop不匹配');
+					}
+					startStopLoop = function (loopName, action) {
+						if (atConfig.loops[loopName]) {
+							WebWorker.clearInterval(atConfig.loops[loopName], atConfig.loops[loopName]);
+							atConfig.loops[loopName] = null;
+						}
+
+						if (action !== 'start') return;
+
+						const interval = atConfig.runInterval * (loopName === 'guiLoop' ? 10 : 1);
+						WebWorker.setInterval(window[loopName], interval);
+						atConfig.loops[loopName] = interval;
+					}
 				} catch (e) {
 					console.log('自动脆皮WebWorker劫持失败', e)
 					alert('自动脆皮WebWorker劫持失败')
